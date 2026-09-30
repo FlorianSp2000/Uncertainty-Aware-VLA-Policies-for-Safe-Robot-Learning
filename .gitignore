@@ -1,0 +1,24 @@
+# data, checkpoints, outputs (distributed separately, see docs/DATA.md)
+datasets/
+iva_dataset/
+src/data/
+src/results/
+external/V-GPS/results/
+external/V-GPS/checkpoints/
+external/V-GPS/experiments/data/
+external/V-GPS/wandb/
+logs/
+*.sif
+
+# secrets
+.env
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ipynb_checkpoints/
+build/
+dist/

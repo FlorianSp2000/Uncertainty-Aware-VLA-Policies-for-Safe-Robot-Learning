@@ -1,0 +1,27 @@
+# Thesis panel (no title; caption carries the message; drawn at the width it is
+# included at, 0.49\textwidth).
+plot_type: line
+output: src/results/thesis/contrastive_hardest_distances.pdf
+
+title: ""
+xlabel: "Training step"
+ylabel: 'Embedding distance'
+
+style: thesis                  # say_no.utils.figstyle THESIS profile
+width: 0.49                     # = include width, fraction of \textwidth
+height: 2.0
+sci_x: false
+x_thousands: true
+
+series:
+  - run: <wandb-entity>/VGPS_ensemble/<run_id>   # your training run
+    metric: training/mean_contrastive_mean_pos_dist
+    label: "Within-class (hardest)"
+    color: original              # feasible vs feasible
+    smooth: 20
+  - run: <wandb-entity>/VGPS_ensemble/<run_id>   # your training run
+    metric: training/mean_contrastive_mean_neg_dist
+    label: "Between-class (hardest)"
+    color: perturbed             # feasible vs its relabeled clone
+    ls: "--"
+    smooth: 20

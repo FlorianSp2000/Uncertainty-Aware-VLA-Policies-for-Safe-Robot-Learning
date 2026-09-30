@@ -1,0 +1,6 @@
+# SLURM refuses a batch script with CRLF ("Batch script contains DOS line breaks").
+# On a Windows checkout git would otherwise hand these out with CRLF and every
+# transfer would need a sed pass on the cluster.
+*.sbatch text eol=lf
+*.def    text eol=lf
+*.sh     text eol=lf

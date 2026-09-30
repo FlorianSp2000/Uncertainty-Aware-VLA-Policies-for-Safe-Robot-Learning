@@ -1,0 +1,41 @@
+# Penalty sweep runs: 4-member SayNo, Bridge only, rho = 5 % (legend names as in the thesis, Method chapter: "SayNo" = the 4-member run without relabeling, not the 8-member main model; "SayNo-CR, penalty ..." = rho = 5 %), hence the rho5 shade family.
+# Thesis panel (no title; caption carries the message; drawn at the width it is
+# included at, 0.65\textwidth).
+plot_type: line
+output: src/results/thesis/reward_penalty_critic_loss.pdf
+
+title: ""
+xlabel: "Training step"
+ylabel: 'Critic loss'
+
+style: thesis                  # say_no.utils.figstyle THESIS profile
+width: 0.65                     # = include width, fraction of \textwidth
+height: 2.4
+sci_x: false
+x_thousands: true
+log_y: true
+
+series:
+  - run: <wandb-entity>/q-ensemble-ablations/<run_id>   # your training run
+    metric: train/critic_loss
+    label: "SayNo"
+    color: sayno_no_relabeling
+    smooth: 20
+  - run: <wandb-entity>/q-ensemble-ablations/<run_id>   # your training run
+    metric: train/critic_loss
+    label: "SayNo-CR, penalty $-1$"
+    color: {shade_of: sayno_relabeling_rho5, index: 0, n: 3}
+    ls: "--"
+    smooth: 20
+  - run: <wandb-entity>/q-ensemble-ablations/<run_id>   # your training run
+    metric: train/critic_loss
+    label: "SayNo-CR, penalty $-10$"
+    color: {shade_of: sayno_relabeling_rho5, index: 1, n: 3}
+    ls: "-."
+    smooth: 20
+  - run: <wandb-entity>/q-ensemble-ablations/<run_id>   # your training run
+    metric: train/critic_loss
+    label: "SayNo-CR, penalty $-100$"
+    color: {shade_of: sayno_relabeling_rho5, index: 2, n: 3}
+    ls: ":"
+    smooth: 20

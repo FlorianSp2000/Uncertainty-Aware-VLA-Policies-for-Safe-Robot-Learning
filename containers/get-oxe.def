@@ -1,0 +1,72 @@
+Bootstrap: docker
+From: ubuntu:24.04
+
+%files
+    external/rlds_dataset_mod /rlds_dataset_mod
+
+%post
+    set -e
+    export DEBIAN_FRONTEND=noninteractive
+
+    # Ensure required repositories and dependencies are available
+    echo "deb http://archive.ubuntu.com/ubuntu noble universe" >> /etc/apt/sources.list
+    apt-get update
+
+    # Install essential packages
+    apt-get install -y python3-dev python3-pip python3-full swig git curl wget ca-certificates bash
+
+    # Install Miniconda
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+    bash miniconda.sh -b -p /opt/conda
+    rm miniconda.sh
+    
+    # Add conda to PATH
+    export PATH="/opt/conda/bin:$PATH"
+
+    # Install gsutil via Google Cloud SDK
+    curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-x86_64.tar.gz
+    tar -xf google-cloud-cli-linux-x86_64.tar.gz
+    ./google-cloud-sdk/install.sh --quiet
+    ./google-cloud-sdk/bin/gcloud components install gsutil --quiet
+    
+    # Move Google Cloud SDK to a permanent location
+    mv ./google-cloud-sdk /opt/google-cloud-sdk
+    rm -f google-cloud-cli-linux-x86_64.tar.gz
+
+    # Create conda environment from the provided file
+    # Ensure the name matches what's in the yml file or adjust the name below
+    /opt/conda/bin/conda env create -f /rlds_dataset_mod/environment_ubuntu.yml
+    
+    # Install rlds_dataset_mod into the environment with hardcoded env name
+    # Install the package in editable mode
+    /opt/conda/bin/conda run -n rlds_env pip install -e /rlds_dataset_mod
+    
+    # Create conda activation script for singularity
+    mkdir -p /etc/conda
+    cat > /etc/conda/activate-conda.sh <<EOF
+#!/bin/bash
+# Source conda.sh to enable the 'conda activate' command
+. /opt/conda/etc/profile.d/conda.sh
+# Activate the environment with hardcoded name
+conda activate rlds_env
+# Add Google Cloud SDK to PATH
+export PATH="/opt/google-cloud-sdk/bin:\$PATH"
+# Add rlds_dataset_mod to PYTHONPATH
+export PYTHONPATH="\$PYTHONPATH:/rlds_dataset_mod"
+EOF
+    
+    chmod +x /etc/conda/activate-conda.sh
+    
+    # Cleanup
+    apt-get clean
+    /opt/conda/bin/conda clean -afy
+
+%environment
+    export PATH="/opt/conda/bin:/opt/google-cloud-sdk/bin:$PATH"
+    export PYTHONPATH="$PYTHONPATH:/rlds_dataset_mod"
+
+%runscript
+#!/bin/bash
+    # Use bash explicitly and source the activation script
+    source /etc/conda/activate-conda.sh
+    exec "$@"

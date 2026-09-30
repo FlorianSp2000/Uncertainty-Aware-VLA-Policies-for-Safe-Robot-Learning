@@ -1,0 +1,102 @@
+Bootstrap: docker
+From: nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+
+%files
+    # check upgrading to From:nvidia/cuda:12.1.0-cudnn8-devel-ubuntu22.04
+    # Copy source code to the final mount location
+    # Copy source code and essential directories from external/V-GPS
+    # Exclude 'results' directory which contains model checkpoints
+
+    # Copy files directly in the root of external/V-GPS
+    external/V-GPS/requirements.txt /V-GPS/requirements.txt
+    containers/requirements-freeze-roboreward.txt /V-GPS/requirements-freeze.txt
+    external/V-GPS/setup.py /V-GPS/setup.py
+
+    # Copy subdirectories (excluding 'results')
+    # external/V-GPS/datasets /V-GPS/datasets  empty anyway
+    external/V-GPS/experiments /V-GPS/experiments
+    external/V-GPS/jaxrl_m /V-GPS/jaxrl_m
+    external/V-GPS/octo /V-GPS/octo
+    # external/V-GPS/wandb /V-GPS/wandb empty anyway
+
+%environment
+    export PATH="/opt/conda/bin:$PATH"
+    export PYTHONPATH=/V-GPS:$PYTHONPATH
+
+%post
+    # pin every pip install to the versions of the image behind the thesis runs
+    export PIP_CONSTRAINT=/V-GPS/requirements-freeze.txt
+    # Set noninteractive installation
+    export DEBIAN_FRONTEND=noninteractive
+    
+    # Install system dependencies
+    apt-get update && apt-get install -y \
+        wget \
+        git \
+        build-essential \
+        libgl1-mesa-glx \
+        libglib2.0-0 \
+        libsm6 \
+        libxrender1 \
+        libxext6 \
+        cmake \
+        zlib1g-dev \
+        swig \
+        && apt-get clean \
+        && rm -rf /var/lib/apt/lists/*
+
+    # Install Miniconda
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /miniconda.sh
+    bash /miniconda.sh -b -p /opt/conda
+    rm /miniconda.sh
+    
+    # Configure conda and create environment
+    export PATH="/opt/conda/bin:$PATH"
+    conda init bash
+    
+    # Create and activate conda environment
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+    conda create -n vgps python=3.10 -y
+    echo "source activate vgps" >> ~/.bashrc
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate vgps
+    
+    # Create datasets directory
+    mkdir -p /V-GPS/datasets
+
+    # Install JAX with CUDA support
+    pip install --upgrade --no-cache-dir "jax[cuda11_pip]==0.4.20" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+    
+    # Install everything from the final mount path (/V-GPS)
+    # This creates editable installs that point to /V-GPS
+    cd /V-GPS
+    pip install -e .
+    pip install -e octo
+    pip install -r requirements.txt
+    
+    # DON'T delete /V-GPS - it will be overwritten by bind mount at runtime
+    # for working with jupyter 
+    pip install --no-cache-dir \
+        jupyter \
+        scikit-learn \
+        ipywidgets \
+        seaborn
+    # opencv-python    
+    
+    pip install datasets
+    pip install pandas
+
+    conda clean --all -y && pip cache purge
+    rm -rf /opt/conda/pkgs/* ~/.cache/*
+
+
+%runscript
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate vgps
+    
+    # No installation needed! 
+    # The mount overwrites /V-GPS with live source code
+    # but editable installs still point to /V-GPS
+    cd /V-GPS
+    exec "$@"

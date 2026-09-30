@@ -1,0 +1,128 @@
+Bootstrap: docker
+From: nvidia/cuda:12.1.0-cudnn8-devel-ubuntu22.04
+
+%files
+    external/V-GPS/requirements.txt /V-GPS/requirements.txt
+    containers/requirements-freeze-pi0.txt /V-GPS/requirements-freeze.txt
+    external/V-GPS/setup.py /V-GPS/setup.py
+    external/V-GPS/experiments /V-GPS/experiments
+    external/V-GPS/jaxrl_m /V-GPS/jaxrl_m
+    external/V-GPS/octo /V-GPS/octo
+
+%environment
+    export PATH="/opt/conda/bin:$PATH"
+    export PYTHONPATH=/V-GPS:/openpi/src:$PYTHONPATH
+
+%post
+    # pin every pip install to the versions of the image behind the thesis runs
+    export PIP_CONSTRAINT=/V-GPS/requirements-freeze.txt
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt-get update && apt-get install -y \
+        wget \
+        git \
+        build-essential \
+        libgl1-mesa-glx \
+        libglib2.0-0 \
+        libsm6 \
+        libxrender1 \
+        libxext6 \
+        cmake \
+        zlib1g-dev \
+        swig \
+        && apt-get clean \
+        && rm -rf /var/lib/apt/lists/*
+
+    # Install Miniconda
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /miniconda.sh
+    bash /miniconda.sh -b -p /opt/conda
+    rm /miniconda.sh
+
+    export PATH="/opt/conda/bin:$PATH"
+    conda init bash
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
+    # Python 3.11 required by openpi
+    conda create -n pi0 python=3.11 -y
+    echo "source activate pi0" >> ~/.bashrc
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate pi0
+
+    mkdir -p /V-GPS/datasets /openpi
+
+    # ── JAX 0.5.3 with CUDA 12 (openpi requirement) ──────────────────────
+    pip install --upgrade --no-cache-dir \
+        "jax[cuda12]==0.5.3" \
+        -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+
+    # ── Flax 0.10.2 + openpi-specific deps ───────────────────────────────
+    pip install --no-cache-dir \
+        "flax==0.10.2" \
+        "orbax-checkpoint==0.11.13" \
+        "equinox>=0.11.8" \
+        "jaxtyping==0.2.36" \
+        "optax>=0.2.0" \
+        "chex>=0.1.87" \
+        "ml_dtypes>=0.4.0"
+
+    # ── setuptools<81 needed for pkg_resources (used by tensorflow_hub) ──
+    pip install --no-cache-dir "setuptools<81"
+
+    # ── V-GPS requirements (excluding jax/flax/optax/chex/ml_dtypes) ─────
+    # Install the non-conflicting packages from requirements.txt
+    pip install --no-cache-dir \
+        "gym>=0.26" \
+        "numpy>=1.26.0" \
+        "scipy==1.12.0" \
+        "tensorflow_probability==0.23.0" \
+        "tensorflow==2.15.0" \
+        "distrax==0.1.5" \
+        "ml_collections>=0.1.0" \
+        "tqdm>=4.60.0" \
+        "absl-py>=0.12.0" \
+        "wandb>=0.12.14" \
+        "einops>=0.6.1" \
+        "imageio>=2.31.1" \
+        "moviepy>=1.0.3" \
+        "transformers>=4.34.1" \
+        "tensorflow_hub>=0.14.0" \
+        "tensorflow_text>=2.13.0" \
+        "tensorflow_datasets==4.9.2" \
+        "plotly>=5.16.1" \
+        "mediapy>=1.2.0" \
+        "gymnasium==0.29.1" \
+        "matplotlib==3.7.0" \
+        "overrides" \
+        "dlimp @ git+https://github.com/kvablack/dlimp@5edaa4691567873d495633f2708982b42edf1972"
+
+    # ── Install V-GPS packages (editable, /V-GPS is bind-mounted at runtime)
+    cd /V-GPS
+    pip install -e .
+    pip install -e octo
+
+    # ── Jupyter + analysis tools ──────────────────────────────────────────
+    pip install --no-cache-dir \
+        jupyter \
+        scikit-learn \
+        ipywidgets \
+        seaborn \
+        h5py
+
+    # openpi is bind-mounted at /openpi at runtime; no pip install needed
+    # since PYTHONPATH includes /openpi/src
+
+    # Reinstall JAX last to ensure requirements.txt didn't downgrade it
+    pip install --no-cache-dir \
+        "jax[cuda12]==0.5.3" \
+        "flax==0.10.2" \
+        -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+
+    conda clean --all -y && pip cache purge
+    rm -rf /opt/conda/pkgs/* ~/.cache/*
+
+%runscript
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate pi0
+    cd /V-GPS
+    exec "$@"

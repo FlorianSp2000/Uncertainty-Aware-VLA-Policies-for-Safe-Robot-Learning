@@ -1,0 +1,22 @@
+# Thesis panel (no title; caption carries the message; drawn at the width it is
+# included at, 0.49\textwidth).
+plot_type: line
+output: src/results/thesis/contrastive_separation.pdf
+
+title: ""
+xlabel: "Training step"
+ylabel: 'Separation'
+
+style: thesis                  # say_no.utils.figstyle THESIS profile
+width: 0.49                     # = include width, fraction of \textwidth
+height: 2.0
+sci_x: false
+x_thousands: true
+legend: false
+
+series:
+  - run: <wandb-entity>/VGPS_ensemble/<run_id>   # your training run
+    metric: training/mean_contrastive_separation
+    label: "Contrastive run"
+    color: neutral_dark           # a difference of two distances: no palette entity
+    smooth: 20

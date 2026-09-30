@@ -1,0 +1,25 @@
+# Thesis panel, derived from 13_roboreward_auc_line.yaml: same W&B run and metric, (no title; caption carries the message; drawn at the width it is
+# included at, 0.65\textwidth).
+plot_type: line
+output: src/results/thesis/roboreward_inpainting_auroc.pdf
+
+title: ""
+xlabel: "Training step"
+ylabel: 'Object-removal AUROC'
+
+style: thesis                  # say_no.utils.figstyle THESIS profile
+width: 0.65                     # = include width, fraction of \textwidth
+height: 2.4
+sci_x: false
+x_thousands: true
+ylim: [0.4, 0.6]
+hline: {y: 0.5, color: chance}
+legend: false
+y_decimals: 2
+
+series:
+  - run: <wandb-entity>/VGPS_roboreward_ensemble/<run_id>   # your training run
+    metric: inpainting_eval/bridge_fractal_n300_with_inpainted_cleaned_auc_unc
+    label: "RoboReward value ensemble"
+    color: neutral_dark           # not a thesis entity with its own palette key
+    smooth: 1

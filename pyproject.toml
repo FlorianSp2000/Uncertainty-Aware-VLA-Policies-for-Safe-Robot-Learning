@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "say-no"
+version = "0.1.0"
+description = "Uncertainty-aware VLA policies for safe robot learning: host-side analysis, tables and figures of the thesis."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Florian Sprick", email = "florian.sprick@hotmail.com" }]
+
+dependencies = [
+    "numpy>=1.26,<2.0",
+    "pandas>=2.3",
+    "matplotlib>=3.10",
+    "pillow>=11",
+    "tqdm>=4.67",
+    "python-dotenv>=1.1",
+    "pydantic>=2.11",
+]
+
+[project.optional-dependencies]
+analysis = [
+    "h5py>=3.10",
+    "scikit-learn>=1.4",
+    "scipy>=1.11",
+]
+clip = [
+    "torch>=2.2",
+    "transformers>=4.40",
+]
+plot = [
+    "tueplots>=0.2.1",
+    "wandb>=0.18",
+    "pyyaml>=6.0",
+]
+hf = [
+    "datasets>=4.5",
+    "huggingface_hub>=0.25",
+]
+genai = [
+    "google-genai>=1.31",
+]
+all = [
+    "say-no[analysis,plot,hf,genai,clip]",
+]
+
+[dependency-groups]
+dev = [
+    "jupyter",
+    "ipywidgets>=8.1",
+    "ipython",
+    "ruff",
+    "pytest>=8",
+]
+
+[tool.setuptools]
+package-dir = { "say_no" = "src" }
+packages = ["say_no", "say_no.utils", "say_no.cp", "say_no.baselines", "say_no.perturbation"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.uv]
+package = true
