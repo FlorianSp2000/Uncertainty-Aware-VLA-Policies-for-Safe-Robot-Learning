@@ -92,7 +92,7 @@ sbatch slurm/<job>.sbatch
 **Datasets**
 - VLA rollouts released with SAFE (above): OpenVLA on WidowX ([download](https://drive.google.com/file/d/1EwaccasZjnlM9L6SEYyWqTd7d6-BR9zp/view?usp=sharing)); pi0-FAST on LIBERO-10 (HF `oldTOM/pi0-libero-rollouts`), collected by Foresight: H. Zhang et al. *Foresight: Failure Detection for Long-Horizon Robotic Manipulation with Action-Conditioned World Model Latents.* arXiv:2606.23085, 2026. OpenVLA: M. J. Kim et al. *OpenVLA: An Open-Source Vision-Language-Action Model.* CoRL 2024. LIBERO: B. Liu et al. *LIBERO: Benchmarking Knowledge Transfer for Lifelong Robot Learning.* NeurIPS 2023 Datasets and Benchmarks.
 - BridgeData V2: Walke et al., CoRL 2023 (above); Fractal / RT-1 via Open X-Embodiment (above)
-- IVA: W.-H. Hsieh, E. Hsieh, D. Niu, T. Darrell, R. Herzig, D. M. Chan. *Do What? Teaching Vision-Language-Action Models to Reject the Impossible.* Findings of EMNLP 2025. doi:10.18653/v1/2025.findings-emnlp.635
+- IVA: W.-H. Hsieh, E. Hsieh, D. Niu, T. Darrell, R. Herzig, D. M. Chan. *Do What? Teaching Vision-Language-Action Models to Reject the Impossible.* Findings of EMNLP 2025. doi:10.18653/v1/2025.findings-emnlp.635 — not publicly released; obtained from the authors on request (see docs/DATA.md §2).
 - RoboReward: T. Lee, A. Wagenmaker, K. Pertsch, P. Liang, S. Levine, C. Finn. *RoboReward: General-Purpose Vision-Language Reward Models for Robotics.* arXiv:2601.00675, 2026.
 
 **Baselines / encoders**
