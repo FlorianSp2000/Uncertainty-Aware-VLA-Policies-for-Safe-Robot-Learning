@@ -54,7 +54,7 @@ sbatch slurm/<job>.sbatch
 
 ## Reproduce in 4 steps
 
-1. **Data** → [docs/DATA.md](docs/DATA.md): Bridge/Fractal, IVA, SAFE / LIBERO rollouts, RoboReward, evaluation trajectory sets
+1. **Data** → [docs/DATA.md](docs/DATA.md): Bridge/Fractal, IVA, SAFE / LIBERO rollouts, RoboReward, evaluation trajectory sets with object-removal images ([download](https://drive.google.com/file/d/15a_hTGGLPi-Y_cSmMMrG1QxOi_4dmRgZ/view?usp=sharing), 373 MB)
 2. **Train** → [docs/TRAINING.md](docs/TRAINING.md): one sbatch per thesis model, key settings
 3. **Evaluate** (cluster) → [docs/REPRODUCE.md §1](docs/REPRODUCE.md#1-evaluation-cluster): checkpoints → evaluation outputs
 4. **Analyse** (laptop) → [docs/REPRODUCE.md §2–5](docs/REPRODUCE.md#2-bridgefractal-tables-host): evaluation outputs → every table, figure, test

@@ -91,8 +91,15 @@ Each pickle holds first and last frame, actions and instruction for a fixed set 
 | `bridge_fractal_train_n200.pkl` | train | reference set for encoder novelty and CLIP novelty; seen/unseen split |
 | `bridge_fractal_train_n200_inpainted_cleaned.pkl` | train | seen-task object removal (seen/unseen table); SigLIP / RoboReward training-time evaluation |
 
+**Download (the sets used in the thesis):** [`uavla-eval-sets.zip`](https://drive.google.com/file/d/15a_hTGGLPi-Y_cSmMMrG1QxOi_4dmRgZ/view?usp=sharing) (Google Drive, 373 MB; the four pickles above + `README.txt` + `SHA256SUMS`; CC BY 4.0, frames from BridgeData V2 and Open X-Embodiment)
+
+```bash
+unzip uavla-eval-sets.zip -d src/data && (cd src/data && sha256sum -c SHA256SUMS)
+cp src/data/bridge_fractal_*.pkl external/V-GPS/experiments/data/
+```
+
 - Pickles go to both `external/V-GPS/experiments/data/` (cluster jobs) and `src/data/` (host analysis)
-- Object-removal images were edited by hand (external image editor) → a rebuild gives a comparable, not bit-identical set
+- Object-removal images were edited by hand (external image editor) → a rebuild gives a comparable, not bit-identical set; use the download to reproduce the thesis numbers
 
 **To rebuild them from the RLDS data** (inside `train_q.sif`, `external/V-GPS` mounted at `/V-GPS`):
 
